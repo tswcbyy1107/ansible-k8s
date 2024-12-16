@@ -1,0 +1,21 @@
+---
+- name: common tasks for all
+  hosts: all
+  become: yes
+  gather_facts: yes
+  any_errors_fatal: yes
+  # ignore_errors: yes
+  vars_files:
+    - vars/{{ env }}.yml
+  roles:
+    - { role: common, tags: common }
+
+- name: build etcd cluster
+  hosts: etcd
+  become: yes
+  gather_facts: yes
+  any_errors_fatal: yes
+  vars_files:
+    - vars/{{ env }}.yml
+  roles:
+    - { role: etcd, tags: etcd }
