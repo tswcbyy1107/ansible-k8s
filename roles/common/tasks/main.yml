@@ -1,0 +1,51 @@
+- name: Install basic tools
+  yum:
+    name:
+      - jq
+      - lrzsz
+      - kexec-tools
+      - curl
+      - wget
+      - python-pip
+      - vim
+    state: latest
+    update_cache: yes
+  register: yum_result
+  retries: 3
+  delay: 2
+  until: yum_result is success
+
+- name: Create desired dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /data0/logs
+    - /usr/local/kernel
+    - /usr/local/sre
+    - /root/.kube
+    - /etc/rc.d/rc.sre
+    # - /usr/local/canary-tools
+
+- name: Adjust syslog logrotate
+  copy:
+    src: syslog
+    dest: /etc/logrotate.d/syslog
+    owner: root
+    group: root
+    mode: 0644
+    # sha1sum syslog
+    checksum: 434fdb792ed12e6d18cc344dae798ed06a1dc784
+
+- name: Set cluster name
+  copy:
+    dest: /root/.kube/cluster
+    content: |-
+      {"cluster_name":"{{ cluster_name }}"}
+
+- import_tasks: jumpserver_key.yml
+
+- import_tasks: kernel.yml
+
+- import_tasks: rc_local.yml

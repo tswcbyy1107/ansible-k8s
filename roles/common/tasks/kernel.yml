@@ -1,0 +1,5 @@
+# TODO update kernel
+- name: Check kernel version
+  fail:
+    msg: "{{ kernel_version }} expected, {{ ansible_kernel }} in fact"
+  when: kernel_version != ansible_kernel
