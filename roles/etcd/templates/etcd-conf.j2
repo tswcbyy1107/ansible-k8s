@@ -26,7 +26,7 @@ quota-backend-bytes: 16589934592
 listen-peer-urls: https://{{ ansible_facts.default_ipv4.address }}:{{ etcd_listen_peer_port }}
 
 # List of comma separated URLs to listen on for client traffic.
-listen-client-urls: https://{{ ansible_facts.default_ipv4.address }}:{{ etcd_listen_port }},https://127.0.0.1:2379
+listen-client-urls: https://{{ ansible_facts.default_ipv4.address }}:{{ etcd_listen_port }},https://127.0.0.1:{{ etcd_listen_port }}
 
 # Maximum number of snapshot files to retain (0 is unlimited).
 max-snapshots: 5
@@ -44,7 +44,7 @@ initial-advertise-peer-urls: https://{{ ansible_facts.default_ipv4.address }}:{{
 
 # List of this member's client URLs to advertise to the public.
 # The URLs needed to be a comma-separated list.
-advertise-client-urls: https://{{ ansible_facts.default_ipv4.address }}:{{ etcd_listen_port }},https://127.0.0.1:2379
+advertise-client-urls: https://{{ ansible_facts.default_ipv4.address }}:{{ etcd_listen_port }},https://127.0.0.1:{{ etcd_listen_port }}
 
 # Discovery URL used to bootstrap the cluster.
 discovery:
