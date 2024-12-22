@@ -1,0 +1,66 @@
+# centos etcd service config
+- name: Create etcd data dir
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /etc/etcd
+    - "{{ etcd_data_dir }}"
+
+- name: Copy etcd service env
+  template:
+    dest: /etc/etcd/etcd.conf.yml
+    src: etcd-conf.j2
+    trim_blocks: yes
+
+- name: Copy etcd service config
+  copy:
+    src: etcd-conf.service
+    dest: /etc/systemd/system/{{ etcd_service_name }}.service
+    owner: root
+    group: root
+    mode: 0755
+  # notify: Restart etcd service, handler executes after all tasks are completed
+
+- name: Copy etcd tar.gz
+  copy:
+    src: etcd-{{ etcd_version }}-linux-amd64.tar.gz
+    dest: /tmp/
+    checksum: "{{ etcd_tar_checksum[etcd_version] }}"
+
+- name: Unarchive etcd bin
+  unarchive:
+    remote_src: yes
+    src: /tmp/etcd-{{ etcd_version }}-linux-amd64.tar.gz
+    dest: /usr/local/bin/
+    owner: root
+    group: root
+    mode: 0755
+    # 防止解压缩嵌套目录, 解压到/usr/local/bin目录中
+    extra_opts:
+      - --strip-components=1
+      - etcd-{{ etcd_version }}-linux-amd64/etcd
+      - etcd-{{ etcd_version }}-linux-amd64/etcdctl
+
+- name: Start etcd
+  systemd:
+    name: "{{ etcd_service_name }}"
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Check etcd service
+  shell: systemctl is-active {{ etcd_service_name }} && systemctl is-enabled {{ etcd_service_name }}
+  retries: 5
+  delay: 3
+
+- name: Check etcd health
+  shell: ETCDCTL_API=3 /usr/local/bin/etcdctl endpoint health --endpoints https://127.0.0.1:{{ etcd_listen_port | default('2379') }}
+  register: etcd_health_result
+  retries: 5
+  delay: 3
+  environment: "{{ etcdctl_env }}"
+
+- name: Debug etcd health info
+  debug:
+    msg: "{{ etcd_health_result }}"

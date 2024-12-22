@@ -1,0 +1,83 @@
+- name: Create dirs for etcd cert and env
+  file:
+    path: "{{ etcd_cert_dir }}"
+    state: directory
+
+- name: Check etcd certificate exists
+  shell: ls -l  *.pem|wc -l
+  args:
+    chdir: "{{ etcd_cert_dir }}"
+  register: pem_count
+  failed_when: pem_count.stdout | int != 0
+  tags: check_exist_etcd_pem
+
+- name: Yum install cfssl
+  yum:
+    name: cfssl
+    state: latest
+
+- name: Gen etcd certs on etcd first node
+  block:
+    - name: Copy certs configs
+      copy:
+        src: "{{ item }}"
+        dest: "{{ etcd_cert_dir }}"
+      loop:
+        - ca-csr.json
+        - ca-config.json
+        - client-csr.json
+
+    - name: Gen etcd CA certs
+      shell: cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+      args:
+        chdir: "{{ etcd_cert_dir }}"
+
+    - name: Gen etcd client certs
+      shell: |
+        cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=client client-csr.json | cfssljson -bare client
+      args:
+        chdir: "{{ etcd_cert_dir }}"
+
+    - name: Tar etcd certs on etcd first node
+      archive:
+        path:
+          - "{{ etcd_cert_dir }}/ca-config.json"
+          - "{{ etcd_cert_dir }}/ca.pem"
+          - "{{ etcd_cert_dir }}/ca-key.pem"
+          - "{{ etcd_cert_dir }}/client.pem"
+          - "{{ etcd_cert_dir }}/client-key.pem"
+        dest: /tmp/etcd-certs.tar.gz
+        remove: no
+
+    - name: Fetch certs from etcd first node
+      fetch:
+        src: /tmp/etcd-certs.tar.gz
+        dest: /tmp/{{ groups.etcd | first }}/
+        flat: yes
+  delegate_to: "{{ groups.etcd | first }}"
+  run_once: true
+
+- name: Copy certs from local to other etcd nodes
+  unarchive:
+    src: /tmp/{{ groups.etcd | first }}/etcd-certs.tar.gz
+    dest: "{{ etcd_cert_dir }}/"
+  when: inventory_hostname != groups.etcd|first
+
+- name: Copy peer config template
+  template:
+    src: etcd-cluster-csr.j2
+    dest: "{{ etcd_cert_dir }}/etcd-cluster-csr.json"
+  tags: template
+
+- name: Gen etcd server and peer certs using cfssl
+  shell: "cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile={{ item }} etcd-cluster-csr.json | cfssljson -bare {{ item }}"
+  args:
+    chdir: "{{ etcd_cert_dir }}"
+  loop:
+    - server
+    - peer
+
+- name: Chmod etcd pem
+  shell: chmod 0644 *.pem
+  args:
+    chdir: "{{ etcd_cert_dir }}"

@@ -1,0 +1,37 @@
+[Unit]
+Description=etcd
+After=network.target
+
+[Service]
+Type=notify
+WorkingDirectory={{ etcd_data_dir }}
+LimitNOFILE=655350
+Restart=on-failure
+ExecStart=/usr/local/bin/etcd \
+    --name={{ ansible_facts.hostname }} \
+    --advertise-client-urls={{ 'https' if https|bool else 'http' }}://{{ ansible_facts.default_ipv4.address }}:{{ etcd_listen_port }} \
+    --listen-client-urls={{ 'https' if https|bool else 'http' }}://0.0.0.0:{{ etcd_listen_port }} \
+    --initial-advertise-peer-urls=https://{{ ansible_facts.default_ipv4.address }}:{{ etcd_listen_peer_port }} \
+    --listen-peer-urls=https://0.0.0.0:{{ etcd_listen_peer_port }} \
+    --initial-cluster-token={{ cluster_name }} \
+    --initial-cluster={% for host in groups.etcd %}{{ hostvars[host].ansible_facts.hostname }}=https://{{ hostvars[host].ansible_facts.default_ipv4.address }}:{{ etcd_listen_peer_port }}{{ ',' if not loop.last else '' }}{% endfor %} \
+    --initial-cluster-state=new \
+{% if https | bool %}
+    --cert-file={{ etcd_cert_dir }}/server.pem \
+    --key-file={{ etcd_cert_dir }}/server-key.pem \
+    --client-cert-auth \
+{% endif %}
+    --trusted-ca-file={{ etcd_cert_dir }}/ca.pem \
+    --peer-cert-file={{ etcd_cert_dir }}/peer.pem \
+    --peer-key-file={{ etcd_cert_dir }}/peer-key.pem \
+    --peer-client-cert-auth \
+    --peer-trusted-ca-file={{ etcd_cert_dir }}/ca.pem \
+    --quota-backend-bytes=17179869184 \
+    --logger=zap \
+    --pre-vote=true \
+    --experimental-backend-bbolt-freelist-type=map \
+    --experimental-enable-lease-checkpoint=true \
+    --data-dir=/data0/etcd-cluster
+
+[Install]
+WantedBy=multi-user.target

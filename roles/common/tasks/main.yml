@@ -8,6 +8,7 @@
       - wget
       - python-pip
       - vim
+      - cfssl
     state: latest
     update_cache: yes
   register: yum_result
@@ -44,8 +45,8 @@
     content: |-
       {"cluster_name":"{{ cluster_name }}"}
 
-- import_tasks: jumpserver_key.yml
+- import_tasks: jumpserver-key.yml
 
 - import_tasks: kernel.yml
 
-- import_tasks: rc_local.yml
+- import_tasks: rc-local.yml

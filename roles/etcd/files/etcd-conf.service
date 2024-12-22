@@ -1,0 +1,23 @@
+# /usr/lib/systemd/system/etcd.service
+[Unit]
+Description=etcd key-value store
+Documentation=https://github.com/etcd-io/etcd
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=notify
+ExecStart=/usr/local/bin/etcd --config-file=/etc/etcd/etcd.conf.yml
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+KillSignal=SIGTERM
+# User=etcd
+RestartSec=20
+SyslogIdentifier=etcd
+
+LimitNOFILE=65535
+LimitNPROC=65535
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target

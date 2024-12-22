@@ -1,0 +1,37 @@
+ETCD_NAME={{ ansible_facts.nodename }}
+ETCD_INITIAL_CLUSTER={% for host in groups.etcd %}{{ hostvars[host].ansible_facts.nodename }}=https://{{ hostvars[host].ansible_facts.default_ipv4.address }}:{{ etcd_listen_peer_port }}{{ ',' if not loop.last else '\n' }}{% endfor %}
+ETCD_INITIAL_CLUSTER_STATE=new
+ETCD_FORCE_NEW_CLUSTER=true
+
+
+# Peer configuration
+ETCD_INITIAL_ADVERTISE_PEER_URLS=https://{{ ansible_facts.default_ipv4.address }}:{{ etcd_listen_peer_port }}
+ETCD_LISTEN_PEER_URLS=https://{{ ansible_facts.default_ipv4.address }}:{{ etcd_listen_peer_port }}
+
+ETCD_CLIENT_CERT_AUTH=true
+ETCD_PEER_CERT_FILE={{ etcd_cert_dir }}/peer.pem
+ETCD_PEER_KEY_FILE={{ etcd_cert_dir }}/peer-key.pem
+ETCD_PEER_TRUSTED_CA_FILE={{ etcd_cert_dir }}/ca.pem 
+
+# Client/server configuration
+ETCD_ADVERTISE_CLIENT_URLS=https://{{ ansible_facts.default_ipv4.address }}:{{ etcd_listen_port }}
+ETCD_LISTEN_CLIENT_URLS=https://{{ ansible_facts.default_ipv4.address }}:{{ etcd_listen_port }},https://127.0.0.1:2379
+
+ETCD_PEER_CLIENT_CERT_AUTH=true
+ETCD_CERT_FILE={{ etcd_cert_dir }}/server.pem
+ETCD_KEY_FILE={{ etcd_cert_dir }}/server-key.pem
+ETCD_TRUSTED_CA_FILE={{ etcd_cert_dir }}/ca.pem
+
+# Other
+ETCD_DATA_DIR={{ etcd_data_dir }}
+ETCD_STRICT_RECONFIG_CHECK=true
+
+# ExtraEnvs
+ETCD_CLIENT_CERT_AUTH=true
+ETCD_ENABLE_PPROF=true
+ETCD_EXPERIMENTAL_BACKEND_BBOLT_FREELIST_TYPE=map
+ETCD_EXPERIMENTAL_ENABLE_LEASE_CHECKPOINT=true
+ETCD_LOGGER=zap
+ETCD_PEER_CLIENT_CERT_AUTH=true
+ETCD_PRE_VOTE=true
+ETCD_QUOTA_BACKEND_BYTES=17179869184
