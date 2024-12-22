@@ -1,7 +1,7 @@
 {
-    "CN": "etcd",
+    "CN": "etcd-client",
     "key": {
-        "algo": "rsa",
-        "size": 2048
+        "algo": "ecdsa",
+        "size": 256
     }
 }
