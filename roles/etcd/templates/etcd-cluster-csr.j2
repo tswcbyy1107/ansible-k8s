@@ -1,0 +1,27 @@
+{
+    "CN": "{{ ansible_facts.hostname }}",
+    "hosts": [
+{% for host in groups.etcd %}
+        "{{ hostvars[host].ansible_facts.hostname }}",
+{% endfor %}
+{% for host in groups.etcd %}
+        "{{ hostvars[host].ansible_facts.nodename }}",
+{% endfor %}
+{% for host in groups.etcd %}
+        "{{ hostvars[host].ansible_facts.default_ipv4.address }}",
+{% endfor %}
+        "127.0.0.1",
+        "0.0.0.0"
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "L": "SH",
+            "ST": "SH"
+        }
+    ]
+}

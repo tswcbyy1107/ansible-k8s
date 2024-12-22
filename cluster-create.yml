@@ -10,12 +10,13 @@
   roles:
     - { role: pre_check, tags: pre_check }
     - { role: common, tags: common }
-# - name: Build etcd cluster
-#   hosts: etcd
-#   become: yes
-#   # gather_facts: yes
-#   any_errors_fatal: yes
-#   vars_files:
-#     - vars/{{ env }}.yml
-#   roles:
-#     - { role: etcd, tags: etcd }
+
+- name: Build etcd cluster
+  hosts: etcd
+  become: yes
+  # gather_facts: yes
+  any_errors_fatal: yes
+  vars_files:
+    - vars/{{ env }}.yml
+  roles:
+    - { role: etcd, tags: etcd }

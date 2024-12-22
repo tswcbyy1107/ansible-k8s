@@ -6,9 +6,9 @@
     owner: root
     group: root
   loop:
-    - { "file": "set_conntrack.sh", "mode": "0755" }
-    - { "file": "set_nice.sh", "mode": "0755" }
-    - { "file": "set_cgroupv2.sh", "mode": "0755" }
+    - { "file": "set-conntrack.sh", "mode": "0755" }
+    - { "file": "set-nice.sh", "mode": "0755" }
+    - { "file": "set-cgroupv2.sh", "mode": "0755" }
 
 - name: Deploy rc.local
   copy:

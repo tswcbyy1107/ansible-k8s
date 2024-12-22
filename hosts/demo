@@ -16,7 +16,7 @@ cluster_type = canary
 network_type = flannel
 kernel_version = 4.19.95-35
 k8s_version = v1.14.4
-docker_version = 18.06.09
+docker_version = 20.01.01
 kubelet_system_reserved = cpu=500m,memory=200m
 kubelet_cpu_policy = no
 kubelet_root_dir = no
