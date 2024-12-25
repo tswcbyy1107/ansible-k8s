@@ -1,4 +1,3 @@
 #!/bin/bash
-# check&add jumpservers ssh key
-# TODO
+# check&add some necessary jumpservers ssh key
 exit 0

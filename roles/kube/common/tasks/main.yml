@@ -1,0 +1,8 @@
+- include_tasks: sysctl.yml
+  tags: sysctl
+
+- include_tasks: install.yml
+  tags: kube-install
+
+- include_tasks: sudoers.yml
+  tags: dev-sudoers

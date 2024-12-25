@@ -1,5 +1,4 @@
 ---
-# role var config
 # note: etcd assets download, https://github.com/etcd-io/etcd/releases?page=7
 https: yes
 
@@ -10,8 +9,7 @@ etcdctl_env:
   ETCDCTL_KEY: "{{ etcd_cert_dir }}/server-key.pem"
 
 etcd_version_dict:
-  v1.14.4: v3.4.7
-  v1.20.1: v3.5.16
+  v1.27.0: v3.5.16
 
 # k8s version define etcd version
 etcd_version: "{{ etcd_version_dict[k8s_version] }}"

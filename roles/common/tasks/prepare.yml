@@ -1,0 +1,73 @@
+- name: Check inventory node groups
+  fail:
+    msg: master, node, etcd required in host inventory file
+  when: not ('etcd' in groups and 'master' in groups and 'node' in groups)
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Check hostname
+  fail:
+    msg: |
+      check hostname please, if correct flush gather cache with --flush-cache
+  when: ansible_facts.hostname != inventory_hostname_short
+
+- name: Swapoff
+  shell: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+- name: Stop firewalld
+  systemd:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: Install basic tools
+  yum:
+    name:
+      - jq
+      - lrzsz
+      - kexec-tools
+      - curl
+      - wget
+      - python-pip
+      - vim
+      - cfssl
+      - ntp
+      - socat
+      - conntrack
+    state: present
+    update_cache: yes
+  register: yum_result
+  retries: 3
+  delay: 2
+  until: yum_result is success
+
+- name: Create desired dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /data0/logs
+    - /usr/local/kernel
+    - /usr/local/sre
+    - /root/.kube
+    - /etc/rc.d/rc.sre
+
+- name: Adjust syslog logrotate
+  copy:
+    src: syslog
+    dest: /etc/logrotate.d/syslog
+    owner: root
+    group: root
+    mode: 0644
+    # sha1sum syslog
+    checksum: 434fdb792ed12e6d18cc344dae798ed06a1dc784
+
+- name: Add ssh key for important business
+  script: jumpserver-key.sh

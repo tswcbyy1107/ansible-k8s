@@ -1,1 +1,6 @@
 env: prod
+insecure_registries:
+  - repo.net
+  - repo1.net
+
+docker_log_opts_max_file: 10

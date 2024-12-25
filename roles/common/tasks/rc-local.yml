@@ -1,14 +1,14 @@
 - name: Deploy rc scripts
   copy:
-    src: "{{ item.file }}"
-    dest: "/etc/rc.d/rc.sre/{{ item.file }}"
-    mode: "{{ item.mode }}"
+    src: "{{ item }}"
+    dest: "/etc/rc.d/rc.sre/{{ item }}"
+    mode: 0755
     owner: root
     group: root
-  loop:
-    - { "file": "set-conntrack.sh", "mode": "0755" }
-    - { "file": "set-nice.sh", "mode": "0755" }
-    - { "file": "set-cgroupv2.sh", "mode": "0755" }
+  with_items:
+    - set-conntrack.sh
+    - set-nice.sh
+    - set-cgroupv2.sh
 
 - name: Deploy rc.local
   copy:

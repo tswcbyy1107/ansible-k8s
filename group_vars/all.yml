@@ -1,0 +1,17 @@
+machine_type: cvm
+
+kernel_version: 4.19.95-35
+docker_version: 18.09.9
+
+k8s_version: v1.27.0
+cluster_name: dev-k8s
+cluster_vip: 1.1.1.1
+cluster_type: canary
+cluster_network_type: flannel
+
+k8s_cpu_policy: no
+system_reserved_cpu: 500m
+system_reserved_memory: 200m
+
+
+

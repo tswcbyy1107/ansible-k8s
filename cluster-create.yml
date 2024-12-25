@@ -8,7 +8,6 @@
   vars_files:
     - vars/{{ env }}.yml
   roles:
-    - { role: pre_check, tags: pre_check }
     - { role: common, tags: common }
 
 - name: Build etcd cluster
@@ -20,3 +19,32 @@
     - vars/{{ env }}.yml
   roles:
     - { role: etcd, tags: etcd }
+
+- name: Common tasks for k8s cluster
+  hosts: master:node
+  become: yes
+  gather_facts: yes
+  any_errors_fatal: yes
+  vars_files:
+    - vars/{{ env }}.yml
+  roles:
+    - { role: kube/common, tags: kube-common }
+
+
+- name: Deploy k8s master
+  hosts: master
+  become: yes
+  gather_facts: yes
+  any_errors_fatal: yes
+  vars_files:
+    - vars/{{ env }}.yml
+    - vars/secrets.yml
+  tags: master
+  roles:
+    - { role: kube/master, tags: master }
+    - { role: kube/kubectl, tags: kubectl }
+    - {
+        role: kube/network/silver,
+        tags: silver,
+        when: network_type.startswith('silver'),
+      }

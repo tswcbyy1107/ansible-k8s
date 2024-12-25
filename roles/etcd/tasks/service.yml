@@ -24,7 +24,7 @@
 
 - name: Copy etcd tar.gz
   copy:
-    src: etcd-{{ etcd_version }}-linux-amd64.tar.gz
+    src: files/etcd-{{ etcd_version }}-linux-amd64.tar.gz
     dest: /tmp/
     checksum: "{{ etcd_tar_checksum[etcd_version] }}"
 

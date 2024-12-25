@@ -1,0 +1,7 @@
+- name: Copy dev sudoers
+  copy:
+    src: dev-sudoers
+    dest: /etc/sudoers.d/dev-sudoers
+    mode: 0644
+    owner: root
+    group: root

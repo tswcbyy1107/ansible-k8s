@@ -1,0 +1,11 @@
+- name: Copy sysctl.conf
+  copy:
+    src: sysctl.conf
+    dest: /etc/sysctl.conf
+    mode: 0644
+    owner: root
+    group: root
+    checksum: 7c8f79e08cba887996772baf2a77f6886968f19e
+
+- name: Sysctl take effect
+  shell: sysctl -p

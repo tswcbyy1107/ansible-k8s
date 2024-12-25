@@ -8,22 +8,12 @@ k8s-etcd-[1:5]
 [node]
 k8s-node-[1:100]
 
+
 [all:vars]
-; k8s高可用架构, 多台master作为vip的rs, node节点通过vip访问master
-vip = 1.1.1.1
-cluster_name = dev-k8s
-cluster_type = canary
-network_type = flannel
-kernel_version = 4.19.95-35
-k8s_version = v1.14.4
-docker_version = 20.01.01
-kubelet_system_reserved = cpu=500m,memory=200m
-kubelet_cpu_policy = no
-kubelet_root_dir = no
+; k = v
 
 [master:vars]
-count = 3
+; k = v
 
 [etcd:vars]
-count = 5
-
+; k = v

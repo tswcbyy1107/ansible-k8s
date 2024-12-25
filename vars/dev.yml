@@ -1,14 +1,6 @@
 env: dev
-
-receivers:
-  - test.com
-  - bench.com
-
-domain: "{{ env }}.com"
+insecure_registries:
+  - repo.net
+  - repo1.net
+  
 docker_log_opts_max_file: 5
-
-skip_tags: [test, preflight]
-
-skip_tags_v1:
-  - dnsmasq
-  - preflight
