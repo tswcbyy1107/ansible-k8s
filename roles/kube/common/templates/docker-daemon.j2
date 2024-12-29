@@ -13,6 +13,9 @@
         "max-size": "200m",
         "max-file": "{{ docker_log_opts_max_file }}"
     },
+   "exec-opts": [
+        "native.cgroupdriver=systemd"
+    ],
     "live-restore": true,
     "storage-driver": "overlay2",
 {% if docker_storage_opts is defined %}

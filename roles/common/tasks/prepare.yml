@@ -53,7 +53,6 @@
     state: directory
     mode: "0755"
   loop:
-    - /data0/logs
     - /usr/local/kernel
     - /usr/local/sre
     - /root/.kube

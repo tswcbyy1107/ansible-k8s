@@ -1,10 +1,11 @@
-- name: Mkdir k8s&docker
+- name: Mkdir docker
   file:
     path: "{{ item }}"
     state: directory
   with_items: 
     - /data0/kubelet
     - /data0/log/kube
+    - /data0/log/apiserver
     - /etc/kubernetes
     - /etc/kubernetes/manifests
     - /etc/docker/

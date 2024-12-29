@@ -1,0 +1,13 @@
+# TODO 优化不同版本的kubeadm初始化镜像
+- name: Kubeadm v1.18.8 images demo
+  block:
+    - name: Copy kubeadm v1.18.8 images 
+      copy:
+        src: files/kubeadm-v1.18.8.images.tar.gz
+        dest: /tmp/kubeadm-v1.18.8.images.tar.gz
+        owner: root
+        group: root
+        mode: 0755
+    - name: Load kubeadm v1.18.8 images
+      shell: docker load -i /tmp/kubeadm-v1.18.8.images.tar.gz
+  when: k8s_version == "v1.18.8"

@@ -1,0 +1,53 @@
+- name: Create kube dir
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /etc/kubernetes/pki
+    - /etc/kubernetes/pki/etcd
+
+- name: Gather etcd network facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!any'
+      - network
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  when: hostvars[item].ansible_facts.eth0 is not defined
+  with_items: "{{ groups.etcd }}"
+  run_once: true
+
+- name: Copy kubeadm init config template
+  template:
+    src: "kubeadm-{{ k8s_version }}.j2"
+    dest: /tmp/kubeadm-{{ k8s_version }}.yml
+
+- name: Init first master node
+  block:
+    - name: Copy etcd certs to first master node
+      unarchive:
+        src: /tmp/{{ groups.etcd | first }}/etcd-certs.tar.gz
+        dest: /etc/kubernetes/pki/etcd/
+        extra_opts:
+          - ca.pem
+          - client.pem
+          - client-key.pem
+
+    - name: Kubeadm init on first master node
+      shell: kubeadm init --config=/tmp/kubeadm-{{ k8s_version }}.yml
+      register: kubeadm_first_init_result
+
+    - debug: var=kubeadm_first_init_result.stdout verbosity=2
+
+    - name: Tar certs on first master node
+      archive:
+        path: /etc/kubernetes/pki/* 
+        dest: /tmp/master-certs.tar.gz
+
+    - name: Fetch certs on first master node
+      fetch:
+        src: /tmp/master-certs.tar.gz
+        dest: /tmp/{{ groups.master | first }}/
+        flat: true
+  when: inventory_hostname == groups.master|first

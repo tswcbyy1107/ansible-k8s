@@ -1,0 +1,5 @@
+- import_tasks: image.yml
+  tags: kubeadm-images
+
+- import_tasks: init.yml
+  tags: init-master
