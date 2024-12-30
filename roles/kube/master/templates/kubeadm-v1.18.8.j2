@@ -40,7 +40,7 @@ apiServer:
   {% endif %}
   - {{ hostvars[host].ansible_facts.default_ipv4.address }}
   {% endfor %}
-  - {{ cluster_vip }}
+  - {{ cluster_lb }}
   extraArgs:  
     audit-log-path: /data0/log/apiserver/audit.log
     audit-log-maxage: "10"

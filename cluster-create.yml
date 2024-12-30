@@ -38,6 +38,5 @@
   any_errors_fatal: yes
   vars_files:
     - vars/{{ env }}.yml
-  tags: master
   roles:
-    - { role: kube/master, tags: master }
+    - { role: kube/master, tags: kube-master }

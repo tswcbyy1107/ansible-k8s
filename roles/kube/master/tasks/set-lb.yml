@@ -1,0 +1,22 @@
+# - name: Set cluster lb
+#   shell: |
+#     kubectl -n {{ item.ns }} get cm {{ item.cm }} -o yaml \
+#       | sed 's#server: https://.*:6443#server: https://{{ cluster_lb }}:{{ cluster_lb_port }}#g' \
+#       | kubectl -n {{ item.ns }} replace -f -
+#   with_items:
+#     - { "cm":"cluster-info","ns":"kube-public" }
+#     - { "cm":"kube-proxy","ns":"kube-system" }
+#   run_once: true
+#   tags: change-lb
+
+# - name: Kube-proxy pods reload config
+#   shell: |-
+#     kubectl -n kube-system delete po -l k8s-app=kube-proxy --field-selector spec.nodeName=`hostname`
+
+# - name: Check kube-proxy pods running
+#   shell: |-
+#     kubectl -n kube-system get po -l k8s-app=kube-proxy --field-selector spec.nodeName=`hostname` | grep '1/1  *Running'
+#   register: get_kube_proxy_pod_result
+#   until: get_kube_proxy_pod_result is succeeded
+#   retries: 10
+#   delay: 3

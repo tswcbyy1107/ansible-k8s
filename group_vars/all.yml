@@ -5,7 +5,8 @@ docker_version: 18.09.9
 
 k8s_version: v1.18.8
 cluster_name: dev-k8s
-cluster_vip: 1.1.1.1
+cluster_lb: 1.1.1.1
+cluster_lb_port: 8888
 cluster_type: canary
 cluster_network_type: flannel
 
