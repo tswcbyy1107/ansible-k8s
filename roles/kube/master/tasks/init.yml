@@ -51,3 +51,30 @@
         dest: /tmp/{{ groups.master | first }}/
         flat: true
   when: inventory_hostname == groups.master|first
+
+- name: Init other master nodes
+  block:
+    - name: Copy certs to other master nodes
+      unarchive:
+        src: /tmp/{{ groups.master | first }}/master-certs.tar.gz
+        dest: /etc/kubernetes/pki/
+
+    - name: Kubeadm init on other master nodes
+      shell: kubeadm init --config=/tmp/kubeadm-{{ k8s_version }}.yml
+  when: inventory_hostname != groups.master|first
+
+- name: Check kubelet running
+  shell: systemctl is-active kubelet
+  register: kubelet_active_result
+  retries: 6
+  delay: 5
+  until: kubelet_active_result.stdout == 'active'
+
+- name: Copy admin.conf to .kube/config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    remote_src: true
+    owner: root
+    group: root
+

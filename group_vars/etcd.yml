@@ -22,3 +22,5 @@ etcd_data_dir: /data0/etcd-cluster
 etcd_listen_port: 2379
 etcd_listen_peer_port: 2380
 etcd_service_name: etcd
+
+etcd_count: 3

@@ -47,6 +47,15 @@ apiServer:
     audit-log-maxbackup: "10"
     audit-log-maxsize: "100"
 
+controllerManager:
+  extraArgs:
+    address: "0.0.0.0"
+
+scheduler: 
+  extraArgs:
+    address: "0.0.0.0"
+
+
 ---
 # kubelet config
 apiVersion: kubelet.config.k8s.io/v1beta1
