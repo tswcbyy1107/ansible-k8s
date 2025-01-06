@@ -26,6 +26,12 @@
       retries: 6
       delay: 5
       until: docker_active_result.stdout == 'active'
+
+    - name: Load flannel images
+      shell: docker load -i /tmp/flannel-v0.26.2.images.tar.gz
+
+    - name: Load pause images
+      shell: docker load -i /tmp/infra-pause.image.tar.gz
   when: container_runtime == "docker"
 
 - name: Install containerd runtime
@@ -56,6 +62,12 @@
       retries: 6
       delay: 5
       until: containerd_active_result.stdout == 'active'
+
+    - name: Load flannel images
+      shell: ctr -n k8s.io images import /tmp/flannel-v0.26.2.images.tar.gz
+
+    - name: Load pause images
+      shell: ctr -n k8s.io images import /tmp/infra-pause.image.tar.gz
   when: container_runtime == "containerd"
 
 - name: Copy crictl

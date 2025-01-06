@@ -1,10 +1,10 @@
 ### 使用方法
 ---
-基于centos7 4.19内核利用ansible实现k8s集群的新建、扩容、销毁、缩容功能, etcd集群部署等. 
+基于centos7 4.19内核利用ansible实现k8s集群的新建、扩容、销毁、缩容功能, etcd集群部署等. 部分资源是离线下载安装, 如kubeadm等安装包、kube镜像等, 一些是在线安装如containerd、docker等, 可自行根据环境需求修改playbook.
 
-仅创建etcd集群: `ansible-playbook -i inventory cluster-create.yml -e env=dev --tags="etcd"`
+仅创建etcd集群: `ansible-playbook -i hosts/demo cluster-create.yml -e env=dev --tags="etcd"`
 
-创建k8s集群(包含etcd外部集群搭建): `ansible-playbook -i inventory cluster-create.yml -e env=dev`
+创建k8s集群(包含etcd外部集群搭建): `ansible-playbook -i hosts/demo cluster-create.yml -e env=dev`
 
 ### 目录结构
 ---
@@ -57,13 +57,13 @@ registry.aliyuncs.com/google_containers/coredns:v1.8.6
 for i in registry.aliyuncs.com/google_containers/kube-apiserver:v1.24.0 registry.aliyuncs.com/google_containers/kube-controller-manager:v1.24.0 registry.aliyuncs.com/google_containers/kube-scheduler:v1.24.0 registry.aliyuncs.com/google_containers/kube-proxy:v1.24.0 registry.aliyuncs.com/google_containers/pause:3.2 registry.aliyuncs.com/google_containers/coredns:1.6.7;do docker pull $i;done
 
 # docker save load举例
-docker save -o kubeadm-v1.27.0.images.tar.gz registry.aliyuncs.com/google_containers/kube-apiserver:v1.27.0 registry.aliyuncs.com/google_containers/kube-controller-manager:v1.27.0 registry.aliyuncs.com/google_containers/kube-scheduler:v1.27.0 registry.aliyuncs.com/google_containers/kube-proxy:v1.27.0 registry.aliyuncs.com/google_containers/pause:3.9 registry.aliyuncs.com/google_containers/coredns:v1.10.1
+docker save -o kubeadm-v1.24.0.images.tar.gz registry.aliyuncs.com/google_containers/kube-apiserver:v1.27.0 registry.aliyuncs.com/google_containers/kube-controller-manager:v1.27.0 registry.aliyuncs.com/google_containers/kube-scheduler:v1.27.0 registry.aliyuncs.com/google_containers/kube-proxy:v1.27.0 registry.aliyuncs.com/google_containers/pause:3.9 registry.aliyuncs.com/google_containers/coredns:v1.10.1
 
 docker load -i kubeadm-v1.24.0.images.tar.gz
 
 # containerd export import举例
-ctr -n k8s.io images export aliyun.v1.24.0.images.tar.gz registry.aliyuncs.com/google_containers/coredns:v1.8.6 xxx
-ctr -n k8s.io image import aliyun.v1.24.0.images.tar.gz
+ctr -n k8s.io images export kubeadm-v1.24.0.images.tar.gz registry.aliyuncs.com/google_containers/coredns:v1.8.6 xxx
+ctr -n k8s.io image import kubeadm-v1.24.0.images.tar.gz
 ```
 
 <br>
@@ -72,6 +72,19 @@ crictl安装: [cri-tools realease](https://github.com/kubernetes-sigs/cri-tools/
 ```bash
 wget https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.32.0/crictl-v1.32.0-linux-amd64.tar.gz
 
+```
+
+<br>
+
+flannel网络插件安装:
+```bash
+for i in flannel.tar.gz docker.io/flannel/flannel:v0.26.2 docker.io/flannel/flannel-cni-plugin:v1.6.0-flannel1 docker.io/flannel/flannel:v0.26.2;do docker pull $i; done
+docker save -o flannel.tar.gz docker.io/flannel/flannel:v0.26.2 docker.io/flannel/flannel-cni-plugin:v1.6.0-flannel1 docker.io/flannel/flannel:v0.26.2
+wget https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml 
+# scp 
+docker load -i flannel.tar.gz
+ctr -n k8s.io image import flannel.tar.gz
+kubectl apply -f kube-flannel.yml 
 ```
 
 <br>

@@ -1,4 +1,6 @@
 
+- import_tasks: image.yml
+
 - import_tasks: container-runtime.yml
 
 - name: Install kubelet/kubectl/kubeadm

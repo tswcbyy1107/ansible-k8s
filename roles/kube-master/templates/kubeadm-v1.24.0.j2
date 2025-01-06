@@ -21,12 +21,16 @@ kind: ClusterConfiguration
 kubernetesVersion: {{ k8s_version }}
 clusterName: {{ cluster_name }}
 imageRepository: {{ kube_image_repo }}
+networking:
+  dnsDomain: "cluster.local"
+  serviceSubnet: "10.96.0.0/12"
+  podSubnet: "10.244.0.0/16"
 
 etcd:
   external:
     endpoints:
 {% for host in groups.etcd %}
-    - https://{{ hostvars[host].ansible_facts.default_ipv4.address }}:{{ etcd_listen_port }}
+    - https://{{ hostvars[host].ansible_facts.default_ipv4.address }}:2379
 {% endfor %}
     caFile: /etc/kubernetes/pki/etcd/ca.pem
     certFile: /etc/kubernetes/pki/etcd/client.pem

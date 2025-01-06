@@ -7,5 +7,5 @@
 - import_tasks: check.yml
   tags: check-master
 
-- import_tasks: set-lb.yml
-  tags: set-cm-lb
+# - import_tasks: set-lb.yml
+#   tags: set-cm-lb

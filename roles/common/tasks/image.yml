@@ -1,0 +1,13 @@
+- name: Copy {{ item }} images
+  copy:
+    src: files/{{ item }}
+    dest: /tmp/
+  with_items:
+    - flannel-v0.26.2.images.tar.gz
+    - infra-pause.image.tar.gz
+
+- name: Copy flannel.yml to master
+  copy: 
+    src: files/kube-flannel.yml
+    dest: /tmp/kube-flannel.yml
+  when: inventory_hostname == groups.master|first

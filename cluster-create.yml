@@ -23,19 +23,19 @@
 - name: Deploy k8s master
   hosts: master
   become: yes
-  gather_facts: no
+  gather_facts: yes
   any_errors_fatal: yes
   vars_files:
     - vars/{{ env }}.yml
   roles:
     - { role: kube-master, tags: kube-master }
 
-# - name: Deploy k8s node
-#   hosts: node
-#   become: yes
-#   gather_facts: yes
-#   any_errors_fatal: yes
-#   vars_files:
-#     - vars/{{ env }}.yml
-#   roles:
-#     - { role: kube/node, tags: kube-node }
+- name: Deploy k8s node
+  hosts: node
+  become: yes
+  gather_facts: yes
+  any_errors_fatal: yes
+  vars_files:
+    - vars/{{ env }}.yml
+  roles:
+    - { role: kube-node, tags: kube-node }

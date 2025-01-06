@@ -63,6 +63,12 @@
       shell: kubeadm init --config=/tmp/kubeadm-{{ k8s_version }}.yml
   when: inventory_hostname != groups.master|first
 
+- name: Enable kubelet
+  systemd:
+    name: kubelet
+    enabled: yes
+    daemon_reload: yes
+
 - name: Check kubelet running
   shell: systemctl is-active kubelet
   register: kubelet_active_result
@@ -77,3 +83,6 @@
     remote_src: true
     owner: root
     group: root
+
+- name: Apply flannel.yml
+  shell: kubectl apply -f /tmp/kube-flannel.yml
