@@ -12,6 +12,11 @@
       check hostname please, if correct flush gather cache with --flush-cache
   when: ansible_facts.hostname != inventory_hostname_short
 
+- name: Check kernel version
+  fail:
+    msg: "{{ kernel_version }} expected, {{ ansible_kernel }} in fact"
+  when: kernel_version != ansible_kernel
+
 - name: Swapoff
   shell: swapoff -a
   when: ansible_swaptotal_mb > 0
@@ -26,17 +31,54 @@
     state: stopped
     enabled: no
 
+- name: Install ipvs ipvsadm
+  yum:
+    name: 
+      - ipset
+      - ipvsadm
+    state: present
+    update_cache: yes
+
+- name: Add ipvs modules config
+  copy:
+    src: ipvs.modules
+    dest: /etc/sysconfig/modules/ipvs.modules
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Task ipvs modules effect
+  shell: /etc/sysconfig/modules/ipvs.modules
+  register: ipvs_modules
+  failed_when: ipvs_modules.rc | int != 0
+
+- name: Create desired dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  with_items:
+    - /usr/local/kernel
+    - /usr/local/sre
+    - /etc/rc.d/rc.sre
+    - /root/.kube
+    - /data0/kubelet
+    - /data0/log/kube
+    - /data0/log/apiserver
+    - /etc/kubernetes
+    - /etc/kubernetes/manifests
+    - /etc/kubernetes/pki
+    - /etc/kubernetes/pki/conf
+    - /etc/kubernetes/pki/etcd
+    - /etc/docker/
+    - /etc/containerd
+
 - name: Install basic tools
   yum:
     name:
       - jq
-      - lrzsz
-      - kexec-tools
       - curl
-      - wget
-      - python-pip
-      - vim
-      - cfssl
+      - cfssl   
       - ntp
       - socat
       - conntrack
@@ -46,27 +88,3 @@
   retries: 3
   delay: 2
   until: yum_result is success
-
-- name: Create desired dirs
-  file:
-    path: "{{ item }}"
-    state: directory
-    mode: "0755"
-  loop:
-    - /usr/local/kernel
-    - /usr/local/sre
-    - /root/.kube
-    - /etc/rc.d/rc.sre
-
-- name: Adjust syslog logrotate
-  copy:
-    src: syslog
-    dest: /etc/logrotate.d/syslog
-    owner: root
-    group: root
-    mode: 0644
-    # sha1sum syslog
-    checksum: 434fdb792ed12e6d18cc344dae798ed06a1dc784
-
-- name: Add ssh key for important business
-  script: jumpserver-key.sh

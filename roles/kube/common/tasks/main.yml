@@ -1,8 +1,0 @@
-- import_tasks: sysctl.yml
-  tags: sysctl
-
-- import_tasks: install.yml
-  tags: kube-install
-
-- import_tasks: sudoers.yml
-  tags: dev-sudoers

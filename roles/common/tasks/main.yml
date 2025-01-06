@@ -1,5 +1,8 @@
+# k8s host prepare
 - import_tasks: prepare.yml
 
-- import_tasks: kernel.yml
+# k8s rpm install
+- import_tasks: kube.yml 
 
-- import_tasks: rc-local.yml
+# sre additional configs
+- import_tasks: sa.yml 

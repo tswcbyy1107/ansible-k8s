@@ -9,7 +9,7 @@ etcdctl_env:
   ETCDCTL_KEY: "{{ etcd_cert_dir }}/server-key.pem"
 
 etcd_version_dict:
-  v1.18.8: v3.5.16
+  v1.24.0: v3.5.16
 
 # k8s version define etcd version
 etcd_version: "{{ etcd_version_dict[k8s_version] }}"

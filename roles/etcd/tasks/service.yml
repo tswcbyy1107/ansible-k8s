@@ -3,7 +3,7 @@
   file:
     path: "{{ item }}"
     state: directory
-  loop:
+  with_items:
     - /etc/etcd
     - "{{ etcd_data_dir }}"
 

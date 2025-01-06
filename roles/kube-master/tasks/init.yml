@@ -1,11 +1,3 @@
-- name: Create kube dir
-  file:
-    path: "{{ item }}"
-    state: directory
-  with_items:
-    - /etc/kubernetes/pki
-    - /etc/kubernetes/pki/etcd
-
 - name: Gather etcd network facts
   setup:
     gather_subset:
@@ -22,6 +14,14 @@
   template:
     src: "kubeadm-{{ k8s_version }}.j2"
     dest: /tmp/kubeadm-{{ k8s_version }}.yml
+
+- name: Copy kubeadm init config template
+  copy:
+    src: "apiserver-audit-policy.yml"
+    dest: /etc/kubernetes/conf/apiserver-audit-policy.yml
+    mode: 0644
+    owner: root
+    group: root
 
 - name: Init first master node
   block:
