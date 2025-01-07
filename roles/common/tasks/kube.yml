@@ -1,0 +1,18 @@
+
+- import_tasks: image.yml
+
+- import_tasks: container-runtime.yml
+
+- name: Install kubelet/kubectl/kubeadm
+  yum:
+    name: "{{ kube_packages[k8s_version] }}"
+    state: present
+    disable_plugin: fastestmirror
+    update_cache: yes
+  when: 1==2 # 直接跳过, 测试机器已安装
+
+- name: Set cluster name
+  copy:
+    dest: /root/.kube/cluster
+    content: |
+      {"cluster_name":"{{ cluster_name }}"}

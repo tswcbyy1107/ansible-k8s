@@ -1,52 +1,8 @@
-- name: Install basic tools
-  yum:
-    name:
-      - jq
-      - lrzsz
-      - kexec-tools
-      - curl
-      - wget
-      - python-pip
-      - vim
-      - cfssl
-    state: latest
-    update_cache: yes
-  register: yum_result
-  retries: 3
-  delay: 2
-  until: yum_result is success
+# k8s host prepare
+- import_tasks: prepare.yml
 
-- name: Create desired dirs
-  file:
-    path: "{{ item }}"
-    state: directory
-    mode: "0755"
-  loop:
-    - /data0/logs
-    - /usr/local/kernel
-    - /usr/local/sre
-    - /root/.kube
-    - /etc/rc.d/rc.sre
-    # - /usr/local/canary-tools
+# k8s rpm install
+- import_tasks: kube.yml 
 
-- name: Adjust syslog logrotate
-  copy:
-    src: syslog
-    dest: /etc/logrotate.d/syslog
-    owner: root
-    group: root
-    mode: 0644
-    # sha1sum syslog
-    checksum: 434fdb792ed12e6d18cc344dae798ed06a1dc784
-
-- name: Set cluster name
-  copy:
-    dest: /root/.kube/cluster
-    content: |-
-      {"cluster_name":"{{ cluster_name }}"}
-
-- import_tasks: jumpserver-key.yml
-
-- import_tasks: kernel.yml
-
-- import_tasks: rc-local.yml
+# sre additional configs
+- import_tasks: sa.yml 

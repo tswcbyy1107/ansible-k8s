@@ -1,0 +1,75 @@
+- name: Install docker runtime
+  block:
+    - name: Install docker
+      yum:
+        name: docker-ce-{{ docker_version }}
+        state: present
+        update_cache: yes
+
+    - name: Docker config daemon.json
+      template:
+        src: docker-daemon.j2
+        dest: /etc/docker/daemon.json
+        trim_blocks: yes
+        lstrip_blocks: yes
+
+    - name: Restart docker
+      systemd:
+        name: docker
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
+
+    - name: Check docker running
+      shell: systemctl is-active docker
+      register: docker_active_result
+      retries: 6
+      delay: 5
+      until: docker_active_result.stdout == 'active'
+
+    - name: Load pause images
+      shell: docker load -i /tmp/infra-pause.3.7.image.tar.gz
+  when: container_runtime == "docker"
+
+- name: Install containerd runtime
+  block:
+    - name: Install containerd
+      yum:
+        name: containerd.io-{{ containerd_version }}
+        state: present
+        update_cache: yes
+
+    - name: Copy containerd toml
+      template:
+        src: containerd.toml.j2
+        dest: /etc/containerd/config.toml
+        trim_blocks: yes
+        lstrip_blocks: yes
+
+    - name: Restart containerd
+      systemd:
+        name: containerd
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
+
+    - name: Check containerd running
+      shell: systemctl is-active containerd
+      register: containerd_active_result
+      retries: 6
+      delay: 5
+      until: containerd_active_result.stdout == 'active'
+
+    - name: Load pause images
+      shell: ctr -n k8s.io images import /tmp/infra-pause.3.7.image.tar.gz
+  when: container_runtime == "containerd"
+
+- name: Copy crictl
+  copy:
+    src: files/crictl-v1.32.0-linux-amd64.tar.gz
+    dest: /tmp/
+
+- name: Install crictl
+  shell: tar -zxvf crictl-v1.32.0-linux-amd64.tar.gz -C /usr/local/bin && crictl config runtime-endpoint "unix:///run/containerd/containerd.sock"
+  args:
+    chdir: /tmp/

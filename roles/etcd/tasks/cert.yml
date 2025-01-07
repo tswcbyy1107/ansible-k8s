@@ -22,7 +22,7 @@
       copy:
         src: "{{ item }}"
         dest: "{{ etcd_cert_dir }}"
-      loop:
+      with_items:
         - ca-csr.json
         - ca-config.json
         - client-csr.json
@@ -73,7 +73,7 @@
   shell: "cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile={{ item }} etcd-cluster-csr.json | cfssljson -bare {{ item }}"
   args:
     chdir: "{{ etcd_cert_dir }}"
-  loop:
+  with_items:
     - server
     - peer
 

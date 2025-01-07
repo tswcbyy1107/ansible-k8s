@@ -1,0 +1,11 @@
+- import_tasks: image.yml
+  tags: kubeadm-images
+
+- import_tasks: init.yml
+  tags: init-master
+
+- import_tasks: check.yml
+  tags: check-master
+
+# - import_tasks: set-lb.yml
+#   tags: set-cm-lb

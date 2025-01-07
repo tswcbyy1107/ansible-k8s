@@ -1,0 +1,27 @@
+- name: Kubeadm {{ k8s_version }} images demo
+  block:
+    - name: Copy kubeadm {{ k8s_version }} images 
+      copy:
+        src: files/kubeadm-{{ k8s_version }}.images.tar.gz
+        dest: /tmp/kubeadm-{{ k8s_version }}.images.tar.gz
+        owner: root
+        group: root
+        mode: 0755
+    - name: Load kubeadm {{ k8s_version }} images
+      shell: docker load -i /tmp/kubeadm-{{ k8s_version }}.images.tar.gz
+  tags: load_images
+  when: container_runtime == "docker"
+
+- name: Kubeadm {{ k8s_version }} images demo
+  block:
+    - name: Copy kubeadm {{ k8s_version }} images 
+      copy:
+        src: files/kubeadm-{{ k8s_version }}.images.tar.gz
+        dest: /tmp/kubeadm-{{ k8s_version }}.images.tar.gz
+        owner: root
+        group: root
+        mode: 0755
+    - name: Load kubeadm {{ k8s_version }} images
+      shell: ctr -n k8s.io images import /tmp/kubeadm-{{ k8s_version }}.images.tar.gz
+  tags: load_images
+  when: container_runtime == "containerd"

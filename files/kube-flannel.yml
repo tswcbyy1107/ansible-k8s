@@ -1,0 +1,2 @@
+flannel安装yml
+wget https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml 

@@ -1,0 +1,3 @@
+- import_tasks: flannel.yml
+  tags: flannel
+  when: cluster_network_type == "flannel"

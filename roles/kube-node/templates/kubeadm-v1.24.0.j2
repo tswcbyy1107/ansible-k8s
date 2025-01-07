@@ -1,0 +1,23 @@
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: JoinConfiguration
+caCertPath: /etc/kubernetes/pki/ca.crt
+discovery:
+  bootstrapToken:
+    # apiServerEndpoint: {{ cluster_lb }}:{{ cluster_lb_port }}
+    apiServerEndpoint: {{ hostvars[groups.master | first].ansible_facts.default_ipv4.address }}:6443
+    token: {{ kubeadm_token }}
+    unsafeSkipCAVerification: true
+  timeout: 5m0s
+  tlsBootstrapToken: {{ kubeadm_token }}
+nodeRegistration:
+  criSocket: unix:///var/run/containerd/containerd.sock
+  imagePullPolicy: IfNotPresent
+  taints: 
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/node
+  kubeletExtraArgs:  
+    cpu-manager-policy: "static"
+    log-dir: /data0/log/kube
+    logtostderr: "false"
+    network-plugin: cni
+    pod-infra-container-image: "pod-infra-container-image: {{ kube_image_repo }}/pause:3.7"

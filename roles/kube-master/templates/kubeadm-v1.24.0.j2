@@ -1,0 +1,80 @@
+---
+# note: https://kubernetes.io/zh-cn/docs/reference/config-api/kubeadm-config.v1beta4/
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+nodeRegistration:
+  criSocket: unix:///var/run/containerd/containerd.sock
+  imagePullPolicy: IfNotPresent
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+  kubeletExtraArgs:
+    log-dir: /data0/log/kube
+    logtostderr: "false"
+    pod-infra-container-image: {{ kube_image_repo }}/pause:3.7
+
+---
+# kubeadm cluster config
+apiVersion: kubeadm.k8s.io/v1beta3
+certificatesDir: /etc/kubernetes/pki
+kind: ClusterConfiguration
+kubernetesVersion: {{ k8s_version }}
+clusterName: {{ cluster_name }}
+imageRepository: {{ kube_image_repo }}
+networking:
+  dnsDomain: "cluster.local"
+  serviceSubnet: "10.96.0.0/12"
+  podSubnet: "10.244.0.0/16"
+
+etcd:
+  external:
+    endpoints:
+{% for host in groups.etcd %}
+    - https://{{ hostvars[host].ansible_facts.default_ipv4.address }}:2379
+{% endfor %}
+    caFile: /etc/kubernetes/pki/etcd/ca.pem
+    certFile: /etc/kubernetes/pki/etcd/client.pem
+    keyFile: /etc/kubernetes/pki/etcd/client-key.pem
+
+apiServer:
+  certSANs:
+  {% for host in groups.master %}
+  - {{ hostvars[host].ansible_facts.hostname }}
+  {% if hostvars[host].ansible_facts.hostname != hostvars[host].ansible_facts.nodename %}
+  - {{ hostvars[host].ansible_facts.nodename }}
+  {% endif %}
+  - {{ hostvars[host].ansible_facts.default_ipv4.address }}
+  {% endfor %}
+  - {{ cluster_lb }}
+  # https://kubernetes.io/zh-cn/docs/reference/command-line-tools-reference/kube-apiserver/#options
+  extraArgs:  # apiserver的启动参数
+    audit-log-path: /data0/log/apiserver/audit.log
+    audit-policy-file: /etc/kubernetes/conf/apiserver-audit-policy.yml
+    audit-log-maxage: "5"
+    audit-log-maxbackup: "5"
+    audit-log-maxsize: "100"
+  extraVolumes:  # apiserver需要的额外挂载, 日志目录和日志配置
+  - name: k8s-conf
+    hostPath: /etc/kubernetes/conf
+    mountPath: /etc/kubernetes/conf
+    readOnly: true
+    pathType: DirectoryOrCreate
+  - name: apiserver-log
+    hostPath:  /data0/log/apiserver
+    mountPath: /data0/log/apiserver
+    readOnly: false
+    pathType: DirectoryOrCreate
+
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+systemReserved:
+  cpu: {{ system_reserved_cpu }}
+  memory: {{ system_reserved_memory }}
+systemReservedCgroup: "systemd"
+cgroupDriver: "systemd"
+
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: ipvs

@@ -1,0 +1,42 @@
+# set admin.config to node
+- name: Get admin.conf from first master
+  fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: /tmp/{{ groups.master | first }}/admin.conf
+    flat: yes
+  delegate_to: "{{ groups.master | first }}"
+  run_once: true
+
+# - name: Set lb address in admin.conf
+#   replace:
+#     path: /tmp/{{ groups.master | first }}/admin.conf
+#     regexp: '^(    server: https://).*:6443$'
+#     replace: '\g<1>{{ cluster_lb }}:{{ cluster_lb_port }}'
+#   delegate_to: 127.0.0.1
+#   run_once: true
+
+- name: Copy admin.conf to node
+  copy:
+    src: /tmp/{{ groups.master | first }}/admin.conf
+    dest: /root/.kube/config
+
+- name: Enable kubelet
+  systemd:
+    name: kubelet
+    enabled: yes
+    daemon_reload: yes
+
+- name: Ensure node's kubelet is running
+  shell: |
+    systemctl is-active kubelet
+  register: check_kubelet_result
+  until: check_kubelet_result is succeeded
+  retries: 5
+  delay: 3
+
+- name: Get node
+  shell: kubectl get node `hostname`
+  register: get_node_result
+  until: get_node_result is success
+  retries: 5
+  delay: 2

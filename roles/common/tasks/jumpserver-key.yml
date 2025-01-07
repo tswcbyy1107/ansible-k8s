@@ -1,2 +1,0 @@
-- name: Check ssh key for important business
-  script: jumpserver-key.sh

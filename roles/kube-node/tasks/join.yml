@@ -1,0 +1,49 @@
+# - name: Gather master network facts
+#   setup:
+#     gather_subset:
+#       - '!all'
+#       - '!any'
+#       - network
+#   delegate_to: "{{ item }}"
+#   delegate_facts: true
+#   when: hostvars[item].ansible_facts.eth0 is not defined
+#   with_items: "{{ groups.master }}"
+#   run_once: true
+
+# - debug:
+#     msg: "master {{ groups.master|first }} ipv4: {{ hostvars[ groups.master|first ].ansible_facts.default_ipv4.address }}"
+
+# - name: New join token from first master
+#   shell: kubeadm token create
+#   register: token
+#   delegate_to: "{{ groups.master | first }}"
+#   run_once: true
+
+# - name: Copy join config
+#   template:
+#     src: "kubeadm-{{ k8s_version }}.j2"
+#     dest: /tmp/kubeadm-{{ k8s_version }}.yml
+#     trim_blocks: yes
+#     lstrip_blocks: yes
+#   vars:
+#     kubeadm_token: "{{ token.stdout }}"
+
+# - name: Kubeadm join
+#   shell: kubeadm join --config=/tmp/kubeadm-{{ k8s_version }}.yml
+#   register: join_result
+
+# - debug:
+#     msg: "{{ hostvars[inventory_hostname] }} join result: {{ join_result.stdout }}"
+
+- name: Get token from master
+  shell: kubeadm token create --print-join-command
+  register: token
+  delegate_to: "{{ groups.master | first }}"
+  run_once: true
+
+- name: Join master
+  shell: "{{ token.stdout }}"
+  register: join_result
+
+- debug:
+    msg: "{{ inventory_hostname }} join result: {{ join_result.stdout }}"

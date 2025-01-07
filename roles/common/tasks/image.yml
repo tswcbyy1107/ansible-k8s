@@ -1,0 +1,6 @@
+- name: Copy infra pause images
+  copy:
+    src: files/{{ item }}
+    dest: /tmp/
+  with_items:
+    - infra-pause.3.7.image.tar.gz

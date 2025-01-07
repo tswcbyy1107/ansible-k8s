@@ -1,0 +1,14 @@
+- name: Check master node
+  shell: kubectl get node `hostname`
+  register: get_master_result
+  until: get_master_result is succeeded
+  retries: 5
+  delay: 2
+
+- name: Check kube-system pod
+  shell: kubectl -n kube-system get pods -l tier=control-plane |grep Running|wc -l
+  register: control_plane_pods_status_result
+  until: control_plane_pods_status_result.stdout | int == master_count * 3
+  retries: 3
+  delay: 3
+  run_once: true

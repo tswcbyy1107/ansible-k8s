@@ -1,0 +1,32 @@
+apiVersion: audit.k8s.io/v1
+kind: Policy
+
+rules:
+  - level: None
+    verbs: ["create","update","delete","patch"]
+    resources:
+    - group: ""
+      resources: ["apiservices/status", "namespaces/status", "nodes/status", "persistentvolumes/status", "persistentVolumeClaims/status", "pods/status", "resourceQuotas/status", "replicationControllers/status", "services/status"]
+    - group: "extensions"
+      resources: ["apiservices/status", "namespaces/status", "nodes/status", "persistentvolumes/status", "persistentVolumeClaims/status", "pods/status", "resourceQuotas/status", "replicationControllers/status", "services/status"]
+    - group: "apiregistration.k8s.io"
+      resources: ["apiservices/status", "namespaces/status", "nodes/status", "persistentvolumes/status", "persistentVolumeClaims/status", "pods/status", "resourceQuotas/status", "replicationControllers/status", "services/status"]
+    - group: "apps"
+      resources: ["apiservices/status", "namespaces/status", "nodes/status", "persistentvolumes/status", "persistentVolumeClaims/status", "pods/status", "resourceQuotas/status", "replicationControllers/status", "services/status"]
+    - group: "batch"
+      resources: ["apiservices/status", "namespaces/status", "nodes/status", "persistentvolumes/status", "persistentVolumeClaims/status", "pods/status", "resourceQuotas/status", "replicationControllers/status", "services/status"]
+
+  - level: None
+    resources:
+    - group: ""
+      resources: ["events"]
+    - group: "extensions"
+      resources: ["events"]
+    - group: "apiregistration.k8s.io"
+      resources: ["events","tokenreviews"]
+    - group: "authentication.k8s.io"
+      resources: ["tokenreviews"]
+
+  - level: RequestResponse
+    verbs: ["create","delete","update","patch"]
+

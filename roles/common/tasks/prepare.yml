@@ -1,0 +1,90 @@
+- name: Check inventory node groups
+  fail:
+    msg: master, node, etcd required in host inventory file
+  when: not ('etcd' in groups and 'master' in groups and 'node' in groups)
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Check hostname
+  fail:
+    msg: |
+      check hostname please, if correct flush gather cache with --flush-cache
+  when: ansible_facts.hostname != inventory_hostname_short
+
+- name: Check kernel version
+  fail:
+    msg: "{{ kernel_version }} expected, {{ ansible_kernel }} in fact"
+  when: kernel_version != ansible_kernel
+
+- name: Swapoff
+  shell: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+- name: Stop firewalld
+  systemd:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: Install ipvs ipvsadm
+  yum:
+    name: 
+      - ipset
+      - ipvsadm
+    state: present
+    update_cache: yes
+
+- name: Add ipvs modules config
+  copy:
+    src: ipvs.modules
+    dest: /etc/sysconfig/modules/ipvs.modules
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Task ipvs modules effect
+  shell: /etc/sysconfig/modules/ipvs.modules
+  register: ipvs_modules
+  failed_when: ipvs_modules.rc | int != 0
+
+- name: Create desired dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  with_items:
+    - /usr/local/kernel
+    - /usr/local/sre
+    - /etc/rc.d/rc.sre
+    - /root/.kube
+    - /data0/kubelet
+    - /data0/log/kube
+    - /data0/log/apiserver
+    - /etc/kubernetes
+    - /etc/kubernetes/manifests
+    - /etc/kubernetes/pki
+    - /etc/kubernetes/pki/conf
+    - /etc/kubernetes/pki/etcd
+    - /etc/docker/
+    - /etc/containerd
+
+- name: Install basic tools
+  yum:
+    name:
+      - jq
+      - curl
+      - cfssl   
+      - ntp
+      - socat
+      - conntrack
+    state: present
+    update_cache: yes
+  register: yum_result
+  retries: 3
+  delay: 2
+  until: yum_result is success

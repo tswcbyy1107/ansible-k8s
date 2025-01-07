@@ -1,0 +1,28 @@
+{
+{% if gpu %}
+    "default-runtime": "nvidia",
+    "runtimes": {
+        "nvidia": {
+            "path": "/usr/bin/nvidia-container-runtime",
+            "runtimeArgs": []
+        }
+    },
+{% endif %}
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-size": "200m",
+        "max-file": "{{ docker_log_opts_max_file }}"
+    },
+   "exec-opts": [
+        "native.cgroupdriver=systemd"
+    ],
+    "live-restore": true,
+    "storage-driver": "overlay2",
+{% if docker_storage_opts is defined %}
+    "storage-opts": {{ docker_storage_opts | to_json }},
+{% endif %}
+    "graph": "/data0/docker"
+{%- if insecure_registries %},
+    "insecure-registries": {{ insecure_registries | to_json }}
+{% endif %}
+}

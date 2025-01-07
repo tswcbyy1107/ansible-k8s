@@ -1,0 +1,9 @@
+dev ALL=(ALL) NOPASSWD:/usr/bin/journalctl,/usr/sbin/tcpdump,/usr/sbin/iptables,/usr/bin/du,/usr/sbin/iotop,/usr/bin/find,/usr/bin/perf,/bin/ls,/home/dev/pod-ip-release,/usr/local/bin/etcd,/usr/local/bin/etcdctl,/bin/netstat,/bin/docker,/bin/zcat
+dev ALL=(ALL) NOPASSWD:/usr/bin/cat /var/log/message*
+dev ALL=(ALL) NOPASSWD:/usr/bin/cat /etc/kubernetes/kubelet.conf
+dev ALL=(ALL) NOPASSWD:/usr/bin/cat /etc/kubernetes/manifests/kube*
+dev ALL=(ALL) NOPASSWD:/usr/bin/cat /data0/log*
+dev ALL=(ALL) NOPASSWD:/usr/bin/cat /var/lib/kubelet/cpu_manager_state
+dev ALL=(ALL) NOPASSWD:/usr/bin/cat /var/lib/kubelet/config.yaml
+dev ALL=(ALL) NOPASSWD:/usr/bin/cat /var/lib/kubelet/kubeadm-flags.env
+dev ALL=(ALL) NOPASSWD:/usr/bin/cat /var/lib/pke*
