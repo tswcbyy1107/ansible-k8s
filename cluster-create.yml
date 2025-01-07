@@ -1,4 +1,3 @@
----
 - name: Common tasks for all
   hosts: all
   become: yes
@@ -29,6 +28,7 @@
     - vars/{{ env }}.yml
   roles:
     - { role: kube-master, tags: kube-master }
+    - { role: kube-network, tags: kube-network }
 
 - name: Deploy k8s node
   hosts: node

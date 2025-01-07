@@ -1,0 +1,45 @@
+---
+- hosts: node
+  become: yes
+  gather_facts: no
+  vars_files:
+    - vars/{{ env }}.yml
+  tasks:
+    - name: Add offline taint
+      shell: kubectl taint node `hostname` Task=offline:NoExecute --overwrite
+
+    - name: Drain node
+      shell: kubectl drain `hostname`
+      ignore_errors: yes
+
+    - name: Check pod list
+      shell: kubectl get pod -o wide --all-namespaces --field-selector spec.nodeName=`hostname` |grep -v NAME|wc -l
+      register: all_pod_list
+      delegate_to: "{{ ansible_play_hosts | first }}"
+      run_once: true
+      retries: 6
+      delay: 5
+      # kube-proxy
+      until: all_pod_list.stdout|int == 1
+
+    - name: Delete node
+      shell: "kubectl delete node `hostname`"
+      ignore_errors: yes
+
+    - name: Kubeadm reset
+      shell: kubeadm reset -f
+    
+    - name: Umount overlay shm
+      shell: df -h | egrep 'docker|kubelet|containerd'|awk '{print$NF}'|xargs -r umount
+
+    - name: Stop services
+      systemd: 
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+        daemon_reload: yes
+      with_items:
+        - dockerd
+        - containerd
+        - kubelet
+      ignore_errors: yes

@@ -1,10 +1,18 @@
 ### 使用方法
 ---
-基于centos7 4.19内核利用ansible实现k8s集群的新建、扩容、销毁、缩容功能, etcd集群部署等. 部分资源是离线下载安装, 如kubeadm等安装包、kube镜像等, 一些是在线安装如containerd、docker等, 可自行根据环境需求修改playbook.
+基于centos7 4.19内核利用ansible-playbook分role实现k8s集群的新建、扩容、销毁、缩容功能, etcd集群部署等. 部分资源是离线下载安装, 如kubeadm等安装包、kube镜像等, 一些是在线安装如containerd、docker等, 可自行根据环境需求修改playbook.
 
-仅创建etcd集群: `ansible-playbook -i hosts/demo cluster-create.yml -e env=dev --tags="etcd"`
+支持按照不同环境配置参数变量, 变量统一在group_vars目录和vars/{{env}}.yml中.
+
+仅创建etcd集群: `ansible-playbook -i hosts/demo cluster-create.yml -e env=dev --tags="etcd"` or `ansible-playbook -i hosts/demo etcd-create.yml -e env=dev`
 
 创建k8s集群(包含etcd外部集群搭建): `ansible-playbook -i hosts/demo cluster-create.yml -e env=dev`
+
+删除k8s集群(包括删除etcd外部集群): `ansible-playbook -i hosts/demo cluster-destroy.yml`
+
+新增节点: `ansible-playbook -i hosts/demo cluster-expanda.yml -e env=dev`
+
+删除节点: `ansible-playbook -i hosts/demo cluster-reduce.yml`
 
 ### 目录结构
 ---
@@ -58,7 +66,9 @@ for i in registry.aliyuncs.com/google_containers/kube-apiserver:v1.24.0 registry
 
 # docker save load举例
 docker save -o kubeadm-v1.24.0.images.tar.gz registry.aliyuncs.com/google_containers/kube-apiserver:v1.27.0 registry.aliyuncs.com/google_containers/kube-controller-manager:v1.27.0 registry.aliyuncs.com/google_containers/kube-scheduler:v1.27.0 registry.aliyuncs.com/google_containers/kube-proxy:v1.27.0 registry.aliyuncs.com/google_containers/pause:3.9 registry.aliyuncs.com/google_containers/coredns:v1.10.1
+docker save -o infra-pause.3.7.image.tar.gz registry.aliyuncs.com/google_containers/pause:3.7
 
+docker load -i infra-pause.3.7.image.tar.gz
 docker load -i kubeadm-v1.24.0.images.tar.gz
 
 # containerd export import举例

@@ -1,0 +1,48 @@
+- hosts: master:node
+  become: yes
+  gather_facts: no
+  tags: k8s
+  tasks:
+    - name: Delete node
+      shell: "kubectl delete node `hostname`"
+      ignore_errors: yes
+    - name: Kubeadm reset
+      shell: kubeadm reset -f
+    - name: Umount overlay shm
+      shell: df -h | egrep 'docker|kubelet|containerd'|awk '{print$NF}'|xargs -r umount
+    - name: Stop services
+      systemd: 
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+        daemon_reload: yes
+      with_items:
+        - dockerd
+        - containerd
+        - kubelet
+      ignore_errors: yes
+
+- hosts: etcd
+  become: yes
+  gather_facts: no
+  tags: etcd
+  tasks:
+    - name: Stop etcd
+      systemd:
+        name: etcd
+        state: stopped
+        enabled: no
+
+    - name: Delete etcd data
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ etcd_cert_dir }}"
+        - "{{ etcd_data_dir }}"
+
+- hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+    - shell: journalctl --flush && journalctl --vacuum-time=1s

@@ -1,0 +1,24 @@
+- name: Copy flannel images
+  copy:
+    src: files/{{ item }}
+    dest: /tmp/
+  with_items:
+    - flannel-v0.26.2.images.tar.gz
+
+- name: Load flannel images
+  shell: docker load -i /tmp/flannel-v0.26.2.images.tar.gz
+  when: container_runtime == "docker" and cluster_network_type == "flannel"
+
+- name: Load flannel images
+  shell: ctr -n k8s.io images import /tmp/flannel-v0.26.2.images.tar.gz
+  when: container_runtime == "containerd" and cluster_network_type == "flannel"
+
+- name: Install flannel network
+  block:
+  - name: Copy flannel.yml to master
+    copy: 
+      src: files/kube-flannel.yml
+      dest: /tmp/kube-flannel.yml
+  - name: Apply flannel.yml
+    shell: kubectl apply -f /tmp/kube-flannel.yml
+  when: inventory_hostname == groups.master|first and cluster_network_type == "flannel"

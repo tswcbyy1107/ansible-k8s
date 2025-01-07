@@ -1,5 +1,5 @@
 - name: Common tasks for all
-  hosts: node
+  hosts: all
   become: yes
   gather_facts: yes
   any_errors_fatal: yes
@@ -9,12 +9,12 @@
   roles:
     - { role: common, tags: common }
 
-- name: Deploy k8s node
-  hosts: node
+- name: Build etcd cluster
+  hosts: etcd
   become: yes
-  gather_facts: yes
+  gather_facts: no
   any_errors_fatal: yes
   vars_files:
     - vars/{{ env }}.yml
   roles:
-    - { role: kube-node, tags: kube-node }
+    - { role: etcd, tags: etcd }

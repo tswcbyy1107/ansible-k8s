@@ -83,6 +83,3 @@
     remote_src: true
     owner: root
     group: root
-
-- name: Apply flannel.yml
-  shell: kubectl apply -f /tmp/kube-flannel.yml
