@@ -16,6 +16,34 @@
 
 ### 目录结构
 ---
+```bash
+├── files # 全局文件
+├── group_vars # group变量
+├── hosts # inventory host
+├── roles # role列表
+│   ├── common # 通用角色, 安装软件, 创建文件夹等
+│   │   ├── files
+│   │   ├── tasks
+│   │   └── templates
+│   ├── etcd # 创建etcd集群
+│   │   ├── files
+│   │   ├── handlers
+│   │   ├── tasks
+│   │   └── templates
+│   ├── kube-master # 创建master, 支持多master
+│   │   ├── files
+│   │   ├── tasks
+│   │   └── templates
+│   ├── kube-network # 应用网络
+│   │   ├── files
+│   │   └── tasks
+│   └── kube-node # 增加node
+│       ├── files
+│       ├── tasks
+│       └── templates
+└── vars # env环境变量配置
+```
+
 
 ### 参考文档
 ---
