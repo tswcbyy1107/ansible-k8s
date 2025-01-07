@@ -1,7 +1,1 @@
 env: prod
-insecure_registries:
-  - harbor.net
-
-docker_log_opts_max_file: 10
-
-kube_image_repo: "registry.aliyuncs.com/google_containers"
