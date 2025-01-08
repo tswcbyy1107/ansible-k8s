@@ -106,14 +106,6 @@ ctr -n k8s.io image import kubeadm-v1.24.0.images.tar.gz
 
 <br>
 
-crictl安装: [cri-tools realease](https://github.com/kubernetes-sigs/cri-tools/releases)
-```bash
-wget https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.32.0/crictl-v1.32.0-linux-amd64.tar.gz
-
-```
-
-<br>
-
 flannel网络插件安装:
 ```bash
 for i in flannel.tar.gz docker.io/flannel/flannel:v0.26.2 docker.io/flannel/flannel-cni-plugin:v1.6.0-flannel1 docker.io/flannel/flannel:v0.26.2;do docker pull $i; done

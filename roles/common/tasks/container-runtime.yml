@@ -64,12 +64,12 @@
       shell: ctr -n k8s.io images import /tmp/infra-pause.3.7.image.tar.gz
   when: container_runtime == "containerd"
 
-- name: Copy crictl
-  copy:
-    src: files/crictl-v1.32.0-linux-amd64.tar.gz
-    dest: /tmp/
+# - name: Copy crictl
+#   copy:
+#     src: files/crictl-v1.32.0-linux-amd64.tar.gz
+#     dest: /tmp/
 
-- name: Install crictl
-  shell: tar -zxvf crictl-v1.32.0-linux-amd64.tar.gz -C /usr/local/bin && crictl config runtime-endpoint "unix:///run/containerd/containerd.sock"
-  args:
-    chdir: /tmp/
+# - name: Install crictl
+#   shell: tar -zxvf crictl-v1.32.0-linux-amd64.tar.gz -C /usr/local/bin && crictl config runtime-endpoint "unix:///run/containerd/containerd.sock"
+#   args:
+#     chdir: /tmp/
