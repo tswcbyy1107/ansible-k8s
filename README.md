@@ -2,7 +2,7 @@
 ---
 基于centos7 4.19内核利用ansible-playbook分role实现k8s集群的新建、扩容、销毁、缩容功能, etcd集群部署等. 部分资源是离线下载安装, 如kubeadm等安装包、kube镜像等, 一些是在线安装如containerd、docker等, 可自行根据环境需求修改playbook.
 
-支持按照不同环境配置参数变量, 变量统一在group_vars目录和vars/{{env}}.yml中. 已经内置了版本变量, 后续可增加不同版本的k8s部署.
+支持按照不同环境配置参数变量, 变量统一在group_vars目录和vars/{{env}}.yml中. 已经内置了k8s版本变量, 后续可增加不同版本的k8s部署. 支持指定网络模式安装calico或者flannel网络插件.
 
 仅创建etcd集群: `ansible-playbook -i hosts/demo cluster-create.yml -e env=dev --tags="etcd"` or `ansible-playbook -i hosts/demo etcd-create.yml -e env=dev`
 
@@ -108,13 +108,26 @@ ctr -n k8s.io image import kubeadm-v1.24.0.images.tar.gz
 
 flannel网络插件安装:
 ```bash
-for i in flannel.tar.gz docker.io/flannel/flannel:v0.26.2 docker.io/flannel/flannel-cni-plugin:v1.6.0-flannel1 docker.io/flannel/flannel:v0.26.2;do docker pull $i; done
-docker save -o flannel.tar.gz docker.io/flannel/flannel:v0.26.2 docker.io/flannel/flannel-cni-plugin:v1.6.0-flannel1 docker.io/flannel/flannel:v0.26.2
+for i in docker.io/flannel/flannel:v0.26.2 docker.io/flannel/flannel-cni-plugin:v1.6.0-flannel1 docker.io/flannel/flannel:v0.26.2;do docker pull $i; done
+docker save -o flannel-v0.26.2.images.tar.gz docker.io/flannel/flannel:v0.26.2 docker.io/flannel/flannel-cni-plugin:v1.6.0-flannel1 docker.io/flannel/flannel:v0.26.2
 wget https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml 
 # scp 
-docker load -i flannel.tar.gz
-ctr -n k8s.io image import flannel.tar.gz
+docker load -i flannel-v0.26.2.images.tar.gz
+# ctr -n k8s.io image import flannel-v0.26.2.images.tar.gz
 kubectl apply -f kube-flannel.yml 
+```
+
+<br>
+
+calico网络插件安装:
+```bash
+for i in calico.tar.gz docker.io/calico/cni:v3.24.1 docker.io/calico/cni:v3.24.1 docker.io/calico/node:v3.24.1 docker.io/calico/node:v3.24.1 docker.io/calico/kube-controllers:v3.24.1;do docker pull $i; done
+docker save -o calico-v3.24.1.images.tar.gz calico.tar.gz docker.io/calico/cni:v3.24.1 docker.io/calico/cni:v3.24.1 docker.io/calico/node:v3.24.1 docker.io/calico/node:v3.24.1 docker.io/calico/kube-controllers:v3.24.1
+wget wget https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml
+# scp 
+docker load -i calico-v3.24.1.images.tar.gz
+# ctr -n k8s.io image import calico-v3.24.1.images.tar.gz
+kubectl apply -f kube-calico.yml 
 ```
 
 <br>

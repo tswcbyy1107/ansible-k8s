@@ -1,3 +1,7 @@
 - import_tasks: flannel.yml
   tags: flannel
   when: cluster_network_type == "flannel"
+
+- import_tasks: calico.yml
+  tags: calico
+  when: cluster_network_type == "calico"

@@ -1,0 +1,24 @@
+- name: Copy calico images
+  copy:
+    src: files/{{ item }}
+    dest: /tmp/
+  with_items:
+    - calico-v3.24.1.images.tar.gz
+
+- name: Load calico images
+  shell: docker load -i /tmp/calico-v3.24.1.images.tar.gz
+  when: container_runtime == "docker"
+
+- name: Load calico images
+  shell: ctr -n k8s.io images import /tmp/calico-v3.24.1.images.tar.gz
+  when: container_runtime == "containerd"
+
+- name: Install calico network
+  block:
+  - name: Copy calico.yml to master
+    copy: 
+      src: files/kube-calico.yml
+      dest: /tmp/kube-calico.yml
+  - name: Apply calico.yml
+    shell: kubectl apply -f /tmp/kube-calico.yml
+  when: inventory_hostname == groups.master|first
